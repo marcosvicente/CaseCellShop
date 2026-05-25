@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getTestContext, inject } from "./helpers/test-app.js";
+import { apiInject, getTestContext } from "./helpers/test-app.js";
 
 describe("concurrent checkout", () => {
   it("does not oversell limited stock (p2 stock=5)", async () => {
@@ -8,7 +8,7 @@ describe("concurrent checkout", () => {
 
     const results = await Promise.all(
       Array.from({ length: concurrent }).map(() =>
-        inject("POST", "/checkout", {
+        apiInject("POST", "/checkout", {
           payload: { items: [{ productId, quantity: 1 }] },
         }),
       ),
@@ -33,7 +33,7 @@ describe("concurrent checkout", () => {
 
     const results = await Promise.all(
       Array.from({ length: stock + 3 }).map(() =>
-        inject("POST", "/checkout", {
+        apiInject("POST", "/checkout", {
           payload: { items: [{ productId, quantity: 1 }] },
         }),
       ),

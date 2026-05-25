@@ -10,7 +10,8 @@
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "tsc --noEmit"
+    "seed": "tsx scripts/seed.ts",
+    "lint": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json"
   },
   "engines": {
     "node": ">=20"

@@ -1,3 +1,4 @@
+import type { LightMyRequestResponse } from "fastify";
 import { beforeEach, afterEach } from "vitest";
 import { buildApp, closeApp, type AppContext } from "../../src/app.js";
 import { registry } from "../../src/observability/metrics.js";
@@ -15,14 +16,15 @@ export function getTestContext(): AppContext {
   return ctx;
 }
 
-export async function inject(
+/** HTTP helper — not Vitest's `inject()` (dependency injection). */
+export async function apiInject(
   method: "GET" | "POST",
   url: string,
   opts?: {
     payload?: unknown;
     headers?: Record<string, string>;
   },
-) {
+): Promise<LightMyRequestResponse> {
   return ctx.app.inject({
     method,
     url,
@@ -38,7 +40,7 @@ export async function waitForOrderStatus(
 ): Promise<void> {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
-    const res = await inject("GET", `/orders/${orderId}/status`);
+    const res = await apiInject("GET", `/orders/${orderId}/status`);
     if (res.statusCode === 200) {
       const body = res.json() as { status: string };
       if (body.status === expected) return;

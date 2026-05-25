@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { inject, waitForOrderStatus } from "./helpers/test-app.js";
+import { apiInject, waitForOrderStatus } from "./helpers/test-app.js";
 
 describe("POST /checkout", () => {
   it("returns 202 with orderId and processing status", async () => {
-    const res = await inject("POST", "/checkout", {
+    const res = await apiInject("POST", "/checkout", {
       payload: { items: [{ productId: "p1", quantity: 1 }] },
     });
     expect(res.statusCode).toBe(202);
@@ -13,7 +13,7 @@ describe("POST /checkout", () => {
   });
 
   it("rejects empty items", async () => {
-    const res = await inject("POST", "/checkout", {
+    const res = await apiInject("POST", "/checkout", {
       payload: { items: [] },
     });
     expect(res.statusCode).toBe(400);
@@ -22,7 +22,7 @@ describe("POST /checkout", () => {
   });
 
   it("returns 409 when out of stock", async () => {
-    const res = await inject("POST", "/checkout", {
+    const res = await apiInject("POST", "/checkout", {
       payload: { items: [{ productId: "p2", quantity: 999 }] },
     });
     expect(res.statusCode).toBe(409);
@@ -33,14 +33,14 @@ describe("POST /checkout", () => {
 
 describe("GET /orders/:orderId/status", () => {
   it("tracks order until completed", async () => {
-    const checkout = await inject("POST", "/checkout", {
+    const checkout = await apiInject("POST", "/checkout", {
       payload: { items: [{ productId: "p3", quantity: 1 }] },
     });
     const { orderId } = checkout.json() as { orderId: string };
 
     await waitForOrderStatus(orderId, "completed");
 
-    const status = await inject("GET", `/orders/${orderId}/status`);
+    const status = await apiInject("GET", `/orders/${orderId}/status`);
     expect(status.statusCode).toBe(200);
     expect(status.json()).toMatchObject({
       orderId,
@@ -49,7 +49,7 @@ describe("GET /orders/:orderId/status", () => {
   });
 
   it("returns 404 for unknown order", async () => {
-    const res = await inject("GET", "/orders/ord_unknown/status");
+    const res = await apiInject("GET", "/orders/ord_unknown/status");
     expect(res.statusCode).toBe(404);
   });
 });
@@ -59,11 +59,11 @@ describe("Idempotency-Key", () => {
     const key = "idem-test-key-1";
     const payload = { items: [{ productId: "p3", quantity: 1 }] };
 
-    const first = await inject("POST", "/checkout", {
+    const first = await apiInject("POST", "/checkout", {
       payload,
       headers: { "idempotency-key": key },
     });
-    const second = await inject("POST", "/checkout", {
+    const second = await apiInject("POST", "/checkout", {
       payload,
       headers: { "idempotency-key": key },
     });

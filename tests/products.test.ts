@@ -1,23 +1,23 @@
 import { describe, it, expect } from "vitest";
 import { cacheHitTotal, cacheMissTotal } from "../src/observability/metrics.js";
-import { inject } from "./helpers/test-app.js";
+import { apiInject } from "./helpers/test-app.js";
 
 describe("GET /products", () => {
   it("returns catalog", async () => {
-    const res = await inject("GET", "/products");
+    const res = await apiInject("GET", "/products");
     expect(res.statusCode).toBe(200);
     const body = res.json() as { products: unknown[] };
-    expect(body.products.length).toBeGreaterThan(0);
+    expect(body.products).toHaveLength(8);
   });
 
   it("uses cache: miss then hit", async () => {
     const missBefore = (await cacheMissTotal.get()).values[0]?.value ?? 0;
     const hitBefore = (await cacheHitTotal.get()).values[0]?.value ?? 0;
 
-    const first = await inject("GET", "/products");
+    const first = await apiInject("GET", "/products");
     expect(first.statusCode).toBe(200);
 
-    const second = await inject("GET", "/products");
+    const second = await apiInject("GET", "/products");
     expect(second.statusCode).toBe(200);
 
     const missAfter = (await cacheMissTotal.get()).values[0]?.value ?? 0;
@@ -28,7 +28,7 @@ describe("GET /products", () => {
   });
 
   it("propagates correlation headers", async () => {
-    const res = await inject("GET", "/products", {
+    const res = await apiInject("GET", "/products", {
       headers: {
         "x-correlation-id": "corr-test-1",
         "x-request-id": "req-test-1",

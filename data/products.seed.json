@@ -1,0 +1,50 @@
+[
+  {
+    "id": "p1",
+    "name": "Capa iPhone 15 Pro",
+    "price": 99.9,
+    "stock": 10
+  },
+  {
+    "id": "p2",
+    "name": "Capa Samsung S24",
+    "price": 79.9,
+    "stock": 5
+  },
+  {
+    "id": "p3",
+    "name": "Película Vidro Temperado",
+    "price": 29.9,
+    "stock": 50
+  },
+  {
+    "id": "p4",
+    "name": "Capa iPhone 14",
+    "price": 89.9,
+    "stock": 8
+  },
+  {
+    "id": "p5",
+    "name": "Capa Pixel 8",
+    "price": 74.9,
+    "stock": 6
+  },
+  {
+    "id": "p6",
+    "name": "Suporte Veicular Magnético",
+    "price": 49.9,
+    "stock": 20
+  },
+  {
+    "id": "p7",
+    "name": "Carregador USB-C 30W",
+    "price": 59.9,
+    "stock": 15
+  },
+  {
+    "id": "p8",
+    "name": "Cabo USB-C 1m",
+    "price": 19.9,
+    "stock": 100
+  }
+]

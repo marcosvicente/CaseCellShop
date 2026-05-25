@@ -63,6 +63,14 @@ npm run dev
 5. **GET /orders/{orderId}/status** → cole o `orderId` → Execute (aguarde `completed` após ~200ms)
 6. Opcional: header `Idempotency-Key` no checkout para testar retry
 
+### Seed do catálogo
+
+Produtos iniciais em `src/seed/catalog.seed.ts` (carregados automaticamente ao subir a API).
+
+```bash
+npm run seed   # regenera data/products.seed.json e lista o catálogo
+```
+
 ### Testes
 
 ```bash
@@ -160,8 +168,11 @@ src/
   cache/        # Redis + memory
   queue/        # BullMQ + in-memory
   workers/      # ERP simulation
-  observability/
+  seed/         # Catálogo inicial (produtos/estoque); `npm run seed` → `data/products.seed.json`
+  observability/ # Logs Pino, métricas Prometheus, tracing OpenTelemetry, request context
 tests/
+data/           # JSON gerado pelo script de seed (referência / integrações)
+scripts/        # `seed.ts` — regenera o catálogo em disco
 openapi.yaml
 docker-compose.yml
 ```

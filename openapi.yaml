@@ -45,6 +45,8 @@ paths:
               items:
                 - productId: p1
                   quantity: 1
+                - productId: p3
+                  quantity: 2
       responses:
         "202":
           description: Checkout accepted
