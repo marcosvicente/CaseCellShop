@@ -1,0 +1,45 @@
+{
+  "name": "CaseCellShop Backend",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspace",
+  "runServices": ["redis"],
+  "shutdownAction": "stopCompose",
+  "remoteUser": "node",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "vitest.explorer",
+        "redhat.vscode-yaml",
+        "ms-azuretools.vscode-docker",
+        "humao.rest-client"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "typescript.tsdk": "node_modules/typescript/lib",
+        "typescript.enablePromptUseWorkspaceTsdk": true
+      }
+    }
+  },
+  "forwardPorts": [3000, 6379],
+  "portsAttributes": {
+    "3000": {
+      "label": "API / Swagger",
+      "onAutoForward": "notify"
+    },
+    "6379": {
+      "label": "Redis",
+      "onAutoForward": "silent"
+    }
+  },
+  "postCreateCommand": "npm install && npm run seed",
+  "postAttachCommand": "echo 'API: npm run dev:redis → http://localhost:3000/docs | Redis: redis://redis:6379'",
+  "remoteEnv": {
+    "REDIS_URL": "redis://redis:6379",
+    "PORT": "3000",
+    "HOST": "0.0.0.0",
+    "NODE_ENV": "development",
+    "USE_IN_MEMORY": "false"
+  }
+}

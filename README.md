@@ -44,8 +44,20 @@ USE_IN_MEMORY=true npm run dev
 
 # Opção B — com Redis (recomendado para fila BullMQ)
 docker compose up -d redis
-npm run dev
+npm run dev:redis
 ```
+
+### Dev Container (VS Code / Cursor)
+
+1. **Reopen in Container** (`.devcontainer/`)
+2. Aguarde `postCreateCommand` (`npm install` + `npm run seed`)
+3. No terminal do container:
+
+```bash
+npm run dev:redis
+```
+
+Redis já sobe como serviço `redis`; `REDIS_URL=redis://redis:6379` vem configurado. Portas **3000** (API/Swagger) e **6379** (Redis) são encaminhadas automaticamente.
 
 - API: http://localhost:3000  
 - **Swagger UI (testar API):** http://localhost:3000/docs — use **Try it out** em cada endpoint  
@@ -160,6 +172,7 @@ Todas as decisões (reserva síncrona, mutex local, fila dual-mode) foram revisa
 ## Estrutura
 
 ```text
+.devcontainer/  # Node 22 + Redis 7 para desenvolvimento no container
 src/
   app.ts, server.ts
   routes/       # products, checkout, orders, health, metrics
