@@ -1,0 +1,187 @@
+openapi: 3.0.3
+info:
+  title: CaseCellShop API
+  version: 1.0.0
+  description: |
+    Mini backend for catalog (cached), async checkout and order status.
+    Challenge simplifications: no auth, fake ERP, in-memory inventory optional.
+
+servers:
+  - url: http://localhost:3000
+    description: Local development
+
+paths:
+  /products:
+    get:
+      tags: [products]
+      summary: List products (Redis/memory cache, TTL 60s)
+      responses:
+        "200":
+          description: Product catalog
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductsResponse"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /checkout:
+    post:
+      tags: [checkout]
+      summary: Start checkout (202 Accepted, async ERP worker)
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          schema:
+            type: string
+          description: Retries with same key return the same orderId/status
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckoutRequest"
+            example:
+              items:
+                - productId: p1
+                  quantity: 1
+      responses:
+        "202":
+          description: Checkout accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckoutResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/OutOfStock"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /orders/{orderId}/status:
+    get:
+      tags: [orders]
+      summary: Order status (processing | completed | failed)
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          schema:
+            type: string
+          example: ord_replace_after_checkout
+      responses:
+        "200":
+          description: Current status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderStatusResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /health:
+    get:
+      summary: Liveness
+      responses:
+        "200":
+          description: OK
+
+  /metrics:
+    get:
+      summary: Prometheus metrics
+      responses:
+        "200":
+          description: text/plain metrics
+
+components:
+  schemas:
+    Product:
+      type: object
+      required: [id, name, price, stock]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        price: { type: number }
+        stock: { type: integer, minimum: 0 }
+
+    ProductsResponse:
+      type: object
+      properties:
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/Product"
+
+    CheckoutItem:
+      type: object
+      required: [productId, quantity]
+      properties:
+        productId: { type: string }
+        quantity: { type: integer, minimum: 1 }
+
+    CheckoutRequest:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/CheckoutItem"
+
+    CheckoutResponse:
+      type: object
+      properties:
+        orderId: { type: string }
+        status:
+          type: string
+          enum: [processing, completed, failed]
+
+    OrderStatusResponse:
+      allOf:
+        - $ref: "#/components/schemas/CheckoutResponse"
+        - type: object
+          properties:
+            failureReason: { type: string }
+
+    ApiError:
+      type: object
+      properties:
+        error: { type: string }
+        message: { type: string }
+        requestId: { type: string }
+
+  responses:
+    BadRequest:
+      description: Invalid payload
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+          example:
+            error: INVALID_CHECKOUT
+            message: items must not be empty
+    OutOfStock:
+      description: Insufficient stock
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+          example:
+            error: OUT_OF_STOCK
+            message: Product p2 is out of stock
+    NotFound:
+      description: Order not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+    InternalError:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
