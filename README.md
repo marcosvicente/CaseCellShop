@@ -163,7 +163,7 @@ Em produção: `OTEL_EXPORTER_OTLP_ENDPOINT` para Datadog Agent.
 
 Ferramentas de IA foram usadas para:
 
-- Estruturar o repositório e o `pronpt.md` inicial
+- Estruturar o repositório e o `prompt.md` inicial
 - Gerar boilerplate de rotas, métricas e testes
 - Redigir README e runbook
 
